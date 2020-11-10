@@ -58,8 +58,9 @@ def combine_and_write(
     ... )
     'memory://target.zarr'
     """
-    double_open_files = [fsspec.open(url).open() for url in sources]
-    ds = xr.open_mfdataset(double_open_files, combine="nested", concat_dim=concat_dim)
+    # double_open_files = [fsspec.open(url).open() for url in sources]
+    # TODO: Figure out why using `double_open_files` in `open_mfdataset` throws `ValueError: I/O operation on closed file.`
+    ds = xr.open_mfdataset(sources, combine="nested", concat_dim=concat_dim)
     # by definition, this should be a contiguous chunk
     ds = ds.chunk({append_dim: len(sources)})
     mapper = fsspec.get_mapper(target)
