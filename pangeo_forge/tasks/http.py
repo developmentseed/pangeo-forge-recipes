@@ -2,10 +2,10 @@ import os
 
 import fsspec
 from prefect import task
-
+import requests
 
 @task
-def download(source_url, cache_location):
+def download(source_url, cache_location, auth=()):
     """
     Download a remote file to a cache.
 
@@ -30,7 +30,12 @@ def download(source_url, cache_location):
     except FileNotFoundError:
         pass
 
-    with fsspec.open(source_url, mode="rb") as source:
+    if len(auth) == 2:
+        r = requests.get(source_url, auth=auth)
         with fsspec.open(target_url, mode="wb") as target:
-            target.write(source.read())
+            target.write(r.content)
+    else:
+        with fsspec.open(source_url, mode="rb", **kwargs) as source:
+            with fsspec.open(target_url, mode="wb") as target:
+                target.write(source.read())
     return target_url
