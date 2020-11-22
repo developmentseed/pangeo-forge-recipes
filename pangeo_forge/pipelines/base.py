@@ -51,8 +51,6 @@ from prefect import Flow
 from prefect.environments import DaskKubernetesEnvironment, Environment
 from prefect.environments.storage import Storage
 from prefect.environments.storage.github import GitHub
-from prefect.environments import LocalEnvironment
-from prefect.engine.executors import DaskExecutor
 
 HERE = Path(__file__).parent.absolute()
 
@@ -126,15 +124,14 @@ class AbstractPipeline(ABC):
         """
         scheduler_spec_file = str(HERE / "job.yaml")
         worker_spec_file = str(HERE / "worker_pod.yaml")
-        # environment = DaskKubernetesEnvironment(
-        #     min_workers=1,
-        #     max_workers=30,
-        #     scheduler_spec_file=scheduler_spec_file,
-        #     worker_spec_file=worker_spec_file,
-        #     metadata=dict(image="pangeoforge/default-image"),
-        # )
-        environment = LocalEnvironment(executor=DaskExecutor())
 
+        environment = DaskKubernetesEnvironment(
+            min_workers=1,
+            max_workers=30,
+            scheduler_spec_file=scheduler_spec_file,
+            worker_spec_file=worker_spec_file,
+            metadata=dict(image="pangeoforge/default-image"),
+        )
         return environment
 
     @property
